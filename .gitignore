@@ -23,3 +23,7 @@ go.work.sum
 
 # env file
 .env
+
+# Override user-global `.scripts/*` so the committed local-CI helper is versioned with this repo.
+!.scripts/
+!.scripts/*

@@ -192,3 +192,70 @@ func TestApiError_HttPError(t *testing.T) {
 		t.Errorf("Expected error message '%s', but got '%s'", "User not found", message)
 	}
 }
+
+// TestApiError_Unwrap ensures errors.Is and errors.As walk into the wrapped
+// internal cause via the Unwrap method.
+func TestApiError_Unwrap(t *testing.T) {
+	sentinel := errors.New("db unreachable")
+	apiError := NewApiError(InternalServerErrorType, "something broke", WithInternalError(sentinel))
+
+	if !errors.Is(apiError, sentinel) {
+		t.Errorf("errors.Is should match the wrapped sentinel via Unwrap")
+	}
+
+	var target *ApiError
+	if !errors.As(apiError, &target) {
+		t.Errorf("errors.As should unwrap into *ApiError")
+	}
+
+	if apiError.Unwrap() != sentinel {
+		t.Errorf("Unwrap() should return the wrapped sentinel")
+	}
+}
+
+func TestApiError_UnwrapReturnsNilWhenNoInnerError(t *testing.T) {
+	apiError := NewApiError(NotFoundErrorType, "User not found")
+	if apiError.Unwrap() != nil {
+		t.Errorf("Unwrap() should return nil when no internal error is wrapped")
+	}
+}
+
+// TestUnmarshalJSONSafeFromFormatVerbs guards against a previous
+// fmt.Errorf(*aux.InternalError) footgun: a persisted error containing
+// percent signs must round-trip literally, not be interpreted as format verbs.
+func TestUnmarshalJSONSafeFromFormatVerbs(t *testing.T) {
+	jsonStr := `{"internal_error":"query failed: %s AND %d","error_type":"InternalServerError","message":"boom","error_code":500}`
+
+	var apiError ApiError
+	if err := apiError.UnmarshalJSON([]byte(jsonStr)); err != nil {
+		t.Fatalf("failed to unmarshal JSON: %v", err)
+	}
+
+	got := apiError.InnerError.Error()
+	want := "query failed: %s AND %d"
+	if got != want {
+		t.Errorf("expected internal error %q (literal percent signs), got %q", want, got)
+	}
+}
+
+// TestApiError_InternalError confirms the method now returns the wrapped
+// cause via the ApiErrors interface contract (finding #7).
+func TestApiError_InternalError(t *testing.T) {
+	sentinel := errors.New("network timeout")
+	apiError := NewApiError(RequestTimeoutErrorType, "too slow", WithInternalError(sentinel))
+
+	var asInterface ApiErrors = apiError
+	if asInterface.InternalError() != sentinel {
+		t.Errorf("InternalError() via ApiErrors interface should return the wrapped sentinel")
+	}
+}
+
+func TestNewApiError_FallsBackToGenericOnUnknownType(t *testing.T) {
+	apiError := NewApiError("NotARegisteredType", "something weird")
+	if apiError.ErrorType != GenericErrorType {
+		t.Errorf("expected fallback type %s, got %s", GenericErrorType, apiError.ErrorType)
+	}
+	if apiError.ErrorCode != http.StatusInternalServerError {
+		t.Errorf("expected fallback code %d, got %d", http.StatusInternalServerError, apiError.ErrorCode)
+	}
+}
