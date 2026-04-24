@@ -24,7 +24,7 @@ const (
 // ErrorOption configures an ApiError during construction.
 type ErrorOption func(*ApiError)
 
-// ApiErrors is the public contract every API error in the diabuddy platform
+// ApiErrors is the public contract every API error in the nexdoz platform
 // implements. Callers depending on this interface get access to structured
 // metadata (type, code), stable string formatting, HTTP mapping, JSON
 // (un)marshaling, and the wrapped internal error for errors.Is / errors.As
