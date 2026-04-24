@@ -1,19 +1,19 @@
-<p align="center"><img src="art/diabuddy.webp" alt="Diabuddy Error package"></p>
+<p align="center"><img src="art/nexdoz.webp" alt="Diabuddy Error package"></p>
 
 ## Introduction
 
-Diabuddy Errors provides a shared library for the diabuddy platform that standardises the structure of API errors across every Go service.
+Diabuddy Errors provides a shared library for the nexdoz platform that standardises the structure of API errors across every Go service.
 
 ### Install
 
 With Go's module support, `go [build|run|test]` fetches the module automatically once it is imported:
 ```go
-import "github.com/next-trace/diabuddy-errors"
+import "github.com/next-trace/nexdoz-errors"
 ```
 
 Or pull it explicitly:
 ```bash
-go get github.com/next-trace/diabuddy-errors
+go get github.com/next-trace/nexdoz-errors
 ```
 
 ### Use
@@ -24,7 +24,7 @@ package main
 import (
     "encoding/json"
 
-    diabuddyErrors "github.com/next-trace/diabuddy-errors"
+    nexdozErrors "github.com/next-trace/nexdoz-errors"
 )
 
 type User struct{}
@@ -37,10 +37,10 @@ func main() {
     }{}
 
     if err := json.Unmarshal(data, &payload); err != nil {
-        _ = diabuddyErrors.NewApiError(
-            diabuddyErrors.UnprocessableEntityErrorType,
+        _ = nexdozErrors.NewApiError(
+            nexdozErrors.UnprocessableEntityErrorType,
             "unprocessable response data",
-            diabuddyErrors.WithInternalError(err),
+            nexdozErrors.WithInternalError(err),
         )
     }
 }
