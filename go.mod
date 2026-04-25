@@ -1,3 +1,3 @@
 module github.com/next-trace/nexdoz-errors
 
-go 1.26.1
+go 1.26.2
