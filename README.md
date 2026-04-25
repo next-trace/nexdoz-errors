@@ -1,8 +1,8 @@
-<p align="center"><img src="art/nexdoz.webp" alt="Diabuddy Error package"></p>
+<p align="center"><img src="art/nexdoz.webp" alt="Nexdoz Error package"></p>
 
 ## Introduction
 
-Diabuddy Errors provides a shared library for the nexdoz platform that standardises the structure of API errors across every Go service.
+Nexdoz Errors provides a shared library for the nexdoz platform that standardises the structure of API errors across every Go service.
 
 ### Install
 
